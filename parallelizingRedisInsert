@@ -1,0 +1,20 @@
+pip install redis[hiredis]
+
+import pandas as pd
+import redis
+from pyspark.sql.functions import when, lit, col, current_timestamp
+from joblib import Parallel, delayed
+
+pool = redis.ConnectionPool(host='hostName', password='passWord', port=0, db=0)
+r = redis.Redis(connection_pool=pool)
+
+lista_1 = [1, 2, 3]
+lista_2 = ['a', 'b', 'c']
+lista_3 = ['1a', '2b', '3c']
+
+def parallel(var1, var2, var3):
+  chave = str(str(var1) + ':' + str(var2))
+  valor = str(var3)
+  r.lpush(chave,valor)
+  
+result = Parallel(n_jobs=-1, prefer="threads")(delayed(insertRedis)(var1, var2, var3) for var1, var2, var3 in zip (lista_1, lista_2, lista_3))
